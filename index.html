@@ -1,917 +1,196 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Sales Dialer">
-<title>Sales Dialer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  :root {
-    --bg: #0D0F14;
-    --surface: #171A22;
-    --surface2: #1E2230;
-    --border: rgba(255,255,255,0.08);
-    --accent: #F5A623;
-    --accent2: #E8891A;
-    --green: #2ECC71;
-    --red: #E74C3C;
-    --blue: #3498DB;
-    --orange: #E67E22;
-    --gray: #8892A4;
-    --text: #EEF0F5;
-    --text2: #8892A4;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --pad: clamp(1rem, 3vw, 2rem);
-    --card-max: 560px;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sales Dialer">
+  <title>Sales Dialer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="CSS/style.css">
 
-  html { font-size: clamp(14px, 1.8vw, 17px); }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
-    overflow-x: hidden;
-  }
-
-  /* ── LAYOUT WRAPPER ── */
-  .screen { display: none; min-height: 100dvh; flex-direction: column; }
-  .screen.active { display: flex; }
-
-  /* Centered content wrapper for tablet/desktop */
-  .inner {
-    width: 100%;
-    max-width: var(--card-max);
-    margin: 0 auto;
-    padding: 0 var(--pad);
-  }
-
-  /* ── UPLOAD SCREEN ── */
-  #uploadScreen {
-    align-items: center;
-    justify-content: center;
-    padding: var(--pad);
-    text-align: center;
-    gap: clamp(1.25rem, 3vh, 2rem);
-  }
-  #uploadScreen .inner {
-    display: flex; flex-direction: column;
-    align-items: center; gap: clamp(1.25rem, 3vh, 2rem);
-    width: 100%;
-  }
-  .logo-ring {
-    width: clamp(80px, 15vw, 110px);
-    height: clamp(80px, 15vw, 110px);
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent) 0%, #E8891A 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: clamp(2rem, 5vw, 2.8rem);
-    box-shadow: 0 0 60px rgba(245,166,35,0.35);
-    flex-shrink: 0;
-  }
-  .upload-title { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 900; letter-spacing: -0.5px; }
-  .upload-sub { color: var(--text2); font-size: clamp(0.85rem, 2vw, 1rem); line-height: 1.7; }
-
-  .upload-zone {
-    width: 100%;
-    border: 2px dashed rgba(245,166,35,0.4);
-    border-radius: var(--radius);
-    padding: clamp(1.5rem, 5vh, 3rem) 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: rgba(245,166,35,0.04);
-    position: relative;
-  }
-  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(245,166,35,0.1); }
-  .upload-zone input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-  .upload-icon { font-size: clamp(2rem, 5vw, 2.8rem); margin-bottom: 0.75rem; }
-  .upload-zone p { color: var(--text2); font-size: clamp(0.82rem, 2vw, 0.95rem); }
-  .upload-zone strong { color: var(--accent); }
-
-  .col-setup {
-    width: 100%; background: var(--surface);
-    border-radius: var(--radius); padding: clamp(1rem, 2vw, 1.5rem);
-  }
-  .col-setup label { font-size: clamp(0.8rem, 1.8vw, 0.9rem); color: var(--text2); display: block; margin-bottom: 0.4rem; }
-  .col-setup select, .col-setup input {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    color: var(--text); padding: clamp(0.5rem, 1.5vw, 0.75rem) 0.85rem;
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.85rem, 2vw, 1rem);
-    margin-bottom: 1rem; outline: none;
-  }
-  .col-setup select:last-child, .col-setup input:last-child { margin-bottom: 0; }
-
-  /* Grid the col-setup on wider screens */
-  @media (min-width: 520px) {
-    .col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
-    .col-grid .full { grid-column: 1 / -1; }
-  }
-
-  .btn-primary {
-    width: 100%; padding: clamp(0.85rem, 2vh, 1.15rem);
-    background: var(--accent); color: #1a0f00;
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.95rem, 2vw, 1.05rem); font-weight: 700;
-    border: none; border-radius: var(--radius); cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-  }
-  .btn-primary:hover { opacity: 0.92; }
-  .btn-primary:active { transform: scale(0.97); opacity: 0.88; }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* ── DIALER SCREEN ── */
-  #dialerScreen { padding: 0; }
-
-  .dialer-header {
-    padding: clamp(1rem, 2.5vw, 1.5rem) var(--pad) 0;
-    display: flex; align-items: center; justify-content: space-between;
-    max-width: var(--card-max); margin: 0 auto; width: 100%;
-  }
-  .back-btn {
-    background: var(--surface); border: none; color: var(--text2);
-    width: clamp(36px, 6vw, 44px); height: clamp(36px, 6vw, 44px);
-    border-radius: 50%; cursor: pointer;
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .session-title { font-size: clamp(0.82rem, 2vw, 0.95rem); font-weight: 700; color: var(--text2); }
-  .filter-btn {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text2); padding: 0.35rem clamp(0.6rem, 2vw, 0.9rem);
-    border-radius: 20px; font-family: 'Cairo', sans-serif;
-    font-size: clamp(0.75rem, 1.8vw, 0.85rem); cursor: pointer; white-space: nowrap;
-  }
-  .filter-btn.active { background: rgba(245,166,35,0.15); border-color: var(--accent); color: var(--accent); }
-
-  /* Progress */
-  .progress-section {
-    padding: clamp(0.85rem, 2vw, 1.25rem) var(--pad) 0;
-    max-width: var(--card-max); margin: 0 auto; width: 100%;
-  }
-  .progress-numbers {
-    display: flex; justify-content: space-between;
-    font-size: clamp(0.75rem, 1.8vw, 0.88rem); color: var(--text2); margin-bottom: 0.5rem;
-  }
-  .progress-numbers span { font-weight: 700; color: var(--text); }
-  .progress-bar-track { height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.4s ease; }
-  .status-pills { display: flex; gap: 0.45rem; margin-top: 0.85rem; flex-wrap: wrap; }
-  .pill {
-    padding: 0.22rem 0.6rem; border-radius: 20px;
-    font-size: clamp(0.72rem, 1.6vw, 0.82rem); font-weight: 600;
-    background: var(--surface); border: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .pill.called { background: rgba(46,204,113,0.12); border-color: rgba(46,204,113,0.3); color: var(--green); }
-  .pill.noanswer { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.3); color: var(--red); }
-  .pill.callback { background: rgba(52,152,219,0.12); border-color: rgba(52,152,219,0.3); color: var(--blue); }
-  .pill.busy { background: rgba(230,126,34,0.12); border-color: rgba(230,126,34,0.3); color: var(--orange); }
-  .pill.pending { color: var(--text2); }
-
-  /* Contact Card */
-  .contact-card {
-    margin: clamp(0.75rem, 2vw, 1.25rem) var(--pad);
-    max-width: calc(var(--card-max) - 2 * var(--pad));
-    margin-left: auto; margin-right: auto;
-    background: var(--surface); border-radius: var(--radius);
-    border: 1px solid var(--border); padding: clamp(1.1rem, 3vw, 1.75rem);
-    position: relative; overflow: hidden;
-    width: calc(100% - 2 * var(--pad));
-  }
-  .contact-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--accent);
-  }
-  .contact-number-badge {
-    font-size: clamp(0.72rem, 1.7vw, 0.82rem); color: var(--text2); font-weight: 600;
-    margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between;
-  }
-  .status-tag { font-size: 0.75rem; padding: 0.2rem 0.65rem; border-radius: 20px; font-weight: 700; }
-  .status-tag.called { background: rgba(46,204,113,0.12); color: var(--green); }
-  .status-tag.noanswer { background: rgba(231,76,60,0.12); color: var(--red); }
-  .status-tag.callback { background: rgba(52,152,219,0.12); color: var(--blue); }
-  .status-tag.busy { background: rgba(230,126,34,0.12); color: var(--orange); }
-  .status-tag.pending { background: var(--surface2); color: var(--text2); }
-
-  /* Desktop: split card into two columns */
-  .card-body { display: flex; flex-direction: column; align-items: center; }
-  @media (min-width: 640px) {
-    .contact-card { padding: 1.75rem 2rem; }
-    .card-body { flex-direction: row; align-items: flex-start; gap: 2rem; }
-    .card-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 160px; }
-    .card-right { flex: 1; min-width: 0; }
-    .contact-name, .contact-phone, .contact-extra { text-align: right; }
-    .call-btn { margin-bottom: 0.75rem; }
-  }
-
-  .contact-avatar {
-    width: clamp(56px, 12vw, 76px); height: clamp(56px, 12vw, 76px);
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent) 0%, #E8891A 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 900; color: #1a0f00;
-    margin: 0 auto clamp(0.75rem, 2vw, 1rem);
-  }
-  .contact-name {
-    font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-weight: 900; text-align: center;
-    margin-bottom: 0.35rem;
-  }
-  .contact-phone {
-    font-size: clamp(1rem, 3vw, 1.25rem); text-align: center; color: var(--accent);
-    font-weight: 700; direction: ltr; letter-spacing: 0.5px;
-    margin-bottom: clamp(0.85rem, 2vw, 1.25rem);
-  }
-  .contact-extra {
-    font-size: clamp(0.8rem, 2vw, 0.9rem); color: var(--text2);
-    text-align: center; margin-bottom: clamp(0.85rem, 2vw, 1.25rem);
-  }
-
-  /* Call Button */
-  .call-btn {
-    display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-    width: 100%; padding: clamp(0.9rem, 2.5vw, 1.15rem);
-    background: var(--green); color: #fff;
-    font-family: 'Cairo', sans-serif; font-size: clamp(1rem, 2.5vw, 1.15rem); font-weight: 700;
-    border: none; border-radius: var(--radius); cursor: pointer;
-    text-decoration: none;
-    transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 8px 30px rgba(46,204,113,0.3);
-    margin-bottom: 1rem;
-  }
-  .call-btn:hover { box-shadow: 0 10px 35px rgba(46,204,113,0.45); }
-  .call-btn:active { transform: scale(0.97); }
-  .call-icon { font-size: clamp(1.1rem, 2.5vw, 1.4rem); }
-
-  /* Status Buttons */
-  .status-btns { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(0.4rem, 1.5vw, 0.75rem); }
-  .status-btn {
-    padding: clamp(0.6rem, 2vw, 0.9rem) 0.25rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface2);
-    color: var(--text2); font-family: 'Cairo', sans-serif;
-    font-size: clamp(0.75rem, 1.8vw, 0.88rem); font-weight: 600;
-    cursor: pointer; transition: all 0.15s; text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-  }
-  .status-btn .s-icon { font-size: clamp(1rem, 2.5vw, 1.3rem); }
-  .status-btn:hover { background: rgba(255,255,255,0.05); }
-  .status-btn:active { transform: scale(0.96); }
-  .status-btn.sel-called { background: rgba(46,204,113,0.15); border-color: var(--green); color: var(--green); }
-  .status-btn.sel-noanswer { background: rgba(231,76,60,0.15); border-color: var(--red); color: var(--red); }
-  .status-btn.sel-callback { background: rgba(52,152,219,0.15); border-color: var(--blue); color: var(--blue); }
-  .status-btn.sel-busy { background: rgba(230,126,34,0.15); border-color: var(--orange); color: var(--orange); }
-
-  /* Notes */
-  .notes-area { margin-top: clamp(0.75rem, 2vw, 1rem); }
-  .notes-label { font-size: clamp(0.75rem, 1.8vw, 0.85rem); color: var(--text2); margin-bottom: 0.4rem; }
-  .notes-area textarea {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    color: var(--text); padding: 0.75rem;
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.85rem, 2vw, 0.95rem);
-    resize: none; height: clamp(60px, 10vh, 85px); outline: none;
-    transition: border-color 0.2s;
-  }
-  .notes-area textarea:focus { border-color: rgba(245,166,35,0.5); }
-
-  /* Navigation */
-  .nav-btns {
-    display: flex; gap: clamp(0.75rem, 2vw, 1.25rem);
-    padding: 0 var(--pad) clamp(1rem, 3vh, 2rem);
-    margin-top: auto;
-    max-width: var(--card-max); margin-left: auto; margin-right: auto;
-    width: 100%;
-  }
-  .nav-btn {
-    flex: 1; padding: clamp(0.85rem, 2.5vw, 1.1rem);
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); font-family: 'Cairo', sans-serif;
-    font-size: clamp(0.9rem, 2.5vw, 1.05rem); font-weight: 700;
-    border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-  }
-  .nav-btn:hover { background: var(--surface2); }
-  .nav-btn:active { transform: scale(0.97); }
-  .nav-btn.next { background: var(--accent); color: #1a0f00; border-color: transparent; }
-  .nav-btn.next:hover { opacity: 0.92; }
-  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
-
-  /* ── LIST SCREEN ── */
-  #listScreen { padding: 0; }
-  .list-header {
-    padding: clamp(1rem, 2.5vw, 1.5rem) var(--pad);
-    display: flex; align-items: center; justify-content: space-between;
-    max-width: var(--card-max); margin: 0 auto; width: 100%;
-  }
-  .list-search {
-    padding: 0 var(--pad) 0.75rem;
-    max-width: var(--card-max); margin: 0 auto; width: 100%;
-  }
-  .list-search input {
-    width: 100%; background: var(--surface);
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    color: var(--text); padding: clamp(0.55rem, 1.5vw, 0.75rem) 1rem;
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.88rem, 2vw, 1rem); outline: none;
-    transition: border-color 0.2s;
-  }
-  .list-search input:focus { border-color: rgba(245,166,35,0.5); }
-  .list-items {
-    flex: 1; overflow-y: auto;
-    padding: 0 var(--pad) clamp(1rem, 3vh, 2rem);
-    max-width: var(--card-max); margin: 0 auto; width: 100%;
-  }
-
-  /* On wider screens, list as 2-column grid */
-  @media (min-width: 640px) {
-    .list-items { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; align-content: start; }
-    .list-items > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
-  }
-
-  .list-item {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: clamp(0.75rem, 2vw, 1rem);
-    margin-bottom: 0.6rem; cursor: pointer;
-    display: flex; align-items: center; gap: 0.85rem;
-    transition: background 0.15s;
-  }
-  @media (min-width: 640px) { .list-item { margin-bottom: 0; } }
-  .list-item:hover { background: var(--surface2); }
-  .list-item-avatar {
-    width: clamp(36px, 7vw, 44px); height: clamp(36px, 7vw, 44px);
-    border-radius: 50%; background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: clamp(0.82rem, 2vw, 0.95rem); color: var(--accent);
-    flex-shrink: 0;
-  }
-  .list-item-info { flex: 1; min-width: 0; }
-  .list-item-name { font-weight: 700; font-size: clamp(0.88rem, 2vw, 1rem); }
-  .list-item-phone { font-size: clamp(0.75rem, 1.8vw, 0.85rem); color: var(--text2); direction: ltr; }
-  .list-item-status { flex-shrink: 0; font-size: clamp(0.8rem, 2vw, 1rem); font-weight: 700; }
-
-  /* ── DONE SCREEN ── */
-  #doneScreen {
-    align-items: center; justify-content: center;
-    padding: clamp(1.5rem, 4vw, 3rem) var(--pad); text-align: center;
-    gap: clamp(1rem, 3vh, 1.75rem);
-  }
-  #doneScreen .inner { display: flex; flex-direction: column; align-items: center; gap: inherit; width: 100%; }
-  .done-ring {
-    width: clamp(80px, 15vw, 110px); height: clamp(80px, 15vw, 110px);
-    border-radius: 50%; background: rgba(46,204,113,0.15);
-    border: 2px solid var(--green);
-    display: flex; align-items: center; justify-content: center;
-    font-size: clamp(2rem, 5vw, 2.8rem);
-  }
-  .done-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(0.5rem, 2vw, 1rem); width: 100%; }
-  .done-stat { background: var(--surface); border-radius: var(--radius-sm); padding: clamp(0.75rem, 2vw, 1.25rem); }
-  .done-stat-num { font-size: clamp(1.3rem, 4vw, 2rem); font-weight: 900; }
-  .done-stat-label { font-size: clamp(0.72rem, 1.8vw, 0.85rem); color: var(--text2); margin-top: 0.2rem; }
-
-  .btn-secondary {
-    width: 100%; padding: clamp(0.85rem, 2.5vw, 1.1rem);
-    background: var(--surface); color: var(--text);
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700;
-    border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
-    transition: background 0.15s;
-  }
-  .btn-secondary:hover { background: var(--surface2); }
-  .export-btn {
-    width: 100%; padding: clamp(0.85rem, 2.5vw, 1.1rem);
-    background: transparent; color: var(--accent);
-    font-family: 'Cairo', sans-serif; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700;
-    border: 1px solid rgba(245,166,35,0.4); border-radius: var(--radius); cursor: pointer;
-    transition: background 0.15s;
-  }
-  .export-btn:hover { background: rgba(245,166,35,0.06); }
-
-  /* ── FILTER OVERLAY ── */
-  .filter-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: none; align-items: flex-end; justify-content: center; z-index: 100;
-  }
-  .filter-overlay.open { display: flex; }
-  .filter-sheet {
-    background: var(--surface); border-radius: 20px 20px 0 0;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    width: 100%; max-width: var(--card-max);
-  }
-  @media (min-width: 600px) {
-    .filter-overlay { align-items: center; }
-    .filter-sheet { border-radius: 20px; margin-bottom: 0; }
-  }
-  .filter-sheet h3 { font-size: clamp(0.95rem, 2.5vw, 1.05rem); font-weight: 700; margin-bottom: 1rem; }
-  .filter-option {
-    padding: clamp(0.7rem, 2vw, 0.95rem) 1rem; border-radius: var(--radius-sm);
-    cursor: pointer; display: flex; align-items: center; gap: 0.75rem;
-    font-size: clamp(0.88rem, 2vw, 1rem); transition: background 0.15s;
-  }
-  .filter-option:hover { background: var(--surface2); }
-  .filter-option.active { background: rgba(245,166,35,0.1); color: var(--accent); }
-
-  /* ── DESKTOP: add a subtle bg panel behind the card ── */
-  @media (min-width: 640px) {
-    body { background: #080A0E; }
-    .screen.active {
-      background: radial-gradient(ellipse at 60% 20%, rgba(245,166,35,0.04) 0%, transparent 60%);
-    }
-    #uploadScreen { min-height: 100dvh; }
-    .contact-card { box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-    .dialer-header, .progress-section { padding-top: clamp(1.25rem, 3vh, 2rem); }
-    .nav-btns { padding-bottom: clamp(1.5rem, 4vh, 2.5rem); }
-  }
-
-  /* ── VERY LARGE SCREENS ── */
-  @media (min-width: 900px) {
-    :root { --card-max: 620px; }
-    html { font-size: 16px; }
-  }
-</style>
 </head>
+
 <body>
 
-<!-- UPLOAD SCREEN -->
-<div id="uploadScreen" class="screen active">
-<div class="inner">
-  <div class="logo-ring">📞</div>
-  <div>
-    <div class="upload-title">Sales Dialer</div>
-    <div class="upload-sub">ارفع ملف Excel وابدأ الاتصال<br>بعملائك واحداً واحداً</div>
-  </div>
-
-  <div class="upload-zone" id="dropzone">
-    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
-    <div class="upload-icon">📊</div>
-    <p><strong>اختر ملف Excel</strong></p>
-    <p style="margin-top:0.4rem; font-size:0.82rem;">xlsx, xls, csv مدعومة</p>
-  </div>
-
-  <div class="col-setup" id="colSetup" style="display:none">
-  <div class="col-grid">
-    <div><label>عمود الاسم</label>
-    <select id="nameCol"><option value="">-- بدون اسم --</option></select></div>
-    <div><label>عمود التليفون *</label>
-    <select id="phoneCol"></select></div>
-    <div><label>عمود إضافي (اختياري)</label>
-    <select id="extraCol"><option value="">-- لا يوجد --</option></select></div>
-    <div><label>ابدأ من صف (الأول=1)</label>
-    <input type="number" id="startRow" value="2" min="1"></div>
-  </div>
-  </div>
-
-  <button class="btn-primary" id="startBtn" disabled onclick="startDialer()">ابدأ الاتصالات ←</button>
-</div>
-</div>
-
-<!-- DIALER SCREEN -->
-<div id="dialerScreen" class="screen">
-  <div class="dialer-header">
-    <button class="back-btn" onclick="showList()">☰</button>
-    <span class="session-title" id="sessionTitle">جلسة الاتصال</span>
-    <button class="filter-btn" id="filterToggle" onclick="openFilter()">تصفية</button>
-  </div>
-
-  <div class="progress-section">
-    <div class="progress-numbers">
-      <span id="progText">0 / 0</span>
-      <span id="progPct">0%</span>
-    </div>
-    <div class="progress-bar-track">
-      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
-    </div>
-    <div class="status-pills">
-      <span class="pill called" id="pillCalled">NI 0</span>
-      <span class="pill noanswer" id="pillNo">NA 0</span>
-      <span class="pill callback" id="pillCB">Closed 0</span>
-      <span class="pill busy" id="pillBusy">Busy 0</span>
-      <span class="pill pending" id="pillPend">⋯ 0 معلق</span>
-    </div>
-  </div>
-
-  <div class="contact-card" id="contactCard">
-    <div class="contact-number-badge">
-      <span id="contactIndex">#1</span>
-      <span class="status-tag pending" id="statusTag">معلق</span>
-    </div>
-    <div class="card-body">
-      <div class="card-left">
-        <div class="contact-avatar" id="contactAvatar">؟</div>
-        <div class="contact-name" id="contactName">—</div>
-        <div class="contact-phone" id="contactPhone">—</div>
-        <div class="contact-extra" id="contactExtra"></div>
+  <!-- UPLOAD SCREEN -->
+  <div id="uploadScreen" class="screen active">
+    <div class="inner">
+      <div class="logo-ring">📞</div>
+      <div>
+        <div class="upload-title">Sales Dialer</div>
+        <div class="upload-sub">ارفع ملف Excel وابدأ الاتصال<br>بعملائك واحداً واحداً</div>
       </div>
-      <div class="card-right">
-        <a class="call-btn" id="callBtn" href="#">
-          <span class="call-icon">📞</span>
-          <span>اتصل الآن</span>
-        </a>
-        <div class="status-btns">
-          <button class="status-btn" id="btnCalled" onclick="setStatus('called')">
-            <span class="s-icon">🚫</span><span style="font-size:1rem;font-weight:900">NI</span><span style="font-size:0.7rem;opacity:0.8">Not Interested</span>
-          </button>
-          <button class="status-btn" id="btnNo" onclick="setStatus('noanswer')">
-            <span class="s-icon">📵</span><span style="font-size:1rem;font-weight:900">NA</span><span style="font-size:0.7rem;opacity:0.8">No Answer</span>
-          </button>
-          <button class="status-btn" id="btnCB" onclick="setStatus('callback')">
-            <span class="s-icon">🔒</span><span style="font-size:1rem;font-weight:900">Closed</span><span style="font-size:0.7rem;opacity:0.8">مغلق</span>
-          </button>
-          <button class="status-btn" id="btnBusy" onclick="setStatus('busy')">
-            <span class="s-icon">📳</span><span style="font-size:1rem;font-weight:900">Busy</span><span style="font-size:0.7rem;opacity:0.8">مشغول</span>
-          </button>
-        </div>
-        <div class="notes-area">
-          <div class="notes-label">ملاحظات</div>
-          <textarea id="noteField" placeholder="أضف ملاحظة..." onchange="saveNote()"></textarea>
+
+      <div class="upload-zone" id="dropzone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+        <div class="upload-icon">📊</div>
+        <p><strong>اختر ملف Excel</strong></p>
+        <p style="margin-top:0.4rem; font-size:0.82rem;">xlsx, xls, csv مدعومة</p>
+      </div>
+
+      <div class="col-setup" id="colSetup" style="display:none">
+        <div class="col-grid">
+          <div><label>عمود الاسم</label>
+            <select id="nameCol">
+              <option value="">-- بدون اسم --</option>
+            </select>
+          </div>
+          <div><label>عمود التليفون *</label>
+            <select id="phoneCol"></select>
+          </div>
+          <div><label>عمود إضافي (اختياري)</label>
+            <select id="extraCol">
+              <option value="">-- لا يوجد --</option>
+            </select>
+          </div>
+          <div><label>ابدأ من صف (الأول=1)</label>
+            <input type="number" id="startRow" value="2" min="1">
+          </div>
         </div>
       </div>
+
+      <button class="btn-primary" id="startBtn" disabled onclick="startDialer()">ابدأ الاتصالات ←</button>
     </div>
   </div>
 
-  <div class="nav-btns">
-    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">← السابق</button>
-    <button class="nav-btn next" id="nextBtn" onclick="navigate(1)">التالي →</button>
-  </div>
-</div>
-
-<!-- LIST SCREEN -->
-<div id="listScreen" class="screen">
-  <div class="list-header">
-    <button class="back-btn" onclick="showDialer()">←</button>
-    <span style="font-weight:700">قائمة الاتصالات</span>
-    <button class="export-btn" style="width:auto;padding:0.35rem 0.85rem;font-size:0.85rem;border-radius:20px" onclick="exportResults()">تصدير</button>
-  </div>
-  <div class="list-search">
-    <input type="text" placeholder="بحث..." id="searchInput" oninput="renderList()">
-  </div>
-  <div class="list-items" id="listItems"></div>
-</div>
-
-<!-- DONE SCREEN -->
-<div id="doneScreen" class="screen">
-<div class="inner">
-  <div class="done-ring">🎉</div>
-  <div>
-    <div class="upload-title">انتهت الجلسة!</div>
-    <div class="upload-sub" style="margin-top:0.5rem">أتممت كل الاتصالات</div>
-  </div>
-  <div class="done-stats">
-    <div class="done-stat">
-      <div class="done-stat-num" style="color:var(--green)" id="doneCalledN">0</div>
-      <div class="done-stat-label">NI</div>
+  <!-- DIALER SCREEN -->
+  <div id="dialerScreen" class="screen">
+    <div class="dialer-header">
+      <button class="back-btn" onclick="showList()">☰</button>
+      <span class="session-title" id="sessionTitle">جلسة الاتصال</span>
+      <button class="filter-btn" id="filterToggle" onclick="openFilter()">تصفية</button>
     </div>
-    <div class="done-stat">
-      <div class="done-stat-num" style="color:var(--red)" id="doneNoN">0</div>
-      <div class="done-stat-label">NA</div>
-    </div>
-    <div class="done-stat">
-      <div class="done-stat-num" style="color:var(--blue)" id="doneCBN">0</div>
-      <div class="done-stat-label">Closed</div>
-    </div>
-    <div class="done-stat">
-      <div class="done-stat-num" style="color:var(--orange)" id="doneBusyN">0</div>
-      <div class="done-stat-label">Busy</div>
-    </div>
-  </div>
-  <button class="export-btn" onclick="exportResults()">📥 تصدير النتائج Excel</button>
-  <button class="btn-secondary" onclick="restartApp()">بدء جلسة جديدة</button>
-</div>
-</div>
 
-<!-- FILTER OVERLAY -->
-<div class="filter-overlay" id="filterOverlay" onclick="closeFilter(event)">
-  <div class="filter-sheet">
-    <h3>عرض جهات الاتصال</h3>
-    <div class="filter-option active" id="f-all" onclick="setFilter('all')">🔵 الكل</div>
-    <div class="filter-option" id="f-pending" onclick="setFilter('pending')">⋯ معلق</div>
-    <div class="filter-option" id="f-called" onclick="setFilter('called')">🚫 NI — Not Interested</div>
-    <div class="filter-option" id="f-noanswer" onclick="setFilter('noanswer')">📵 NA — No Answer</div>
-    <div class="filter-option" id="f-callback" onclick="setFilter('callback')">🔒 Closed — مغلق</div>
-    <div class="filter-option" id="f-busy" onclick="setFilter('busy')">📳 Busy — مشغول</div>
-  </div>
-</div>
-
-<script>
-const STORAGE_KEY = 'salesDialer_v1';
-
-let contacts = [];
-let currentIdx = 0;
-let activeFilter = 'all';
-let filteredIndices = [];
-let columns = [];
-let rawData = [];
-
-// ── PERSISTENCE ──────────────────────────────────────────
-function persist() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ contacts, currentIdx, activeFilter }));
-  } catch(e) {}
-}
-
-function loadSession() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return false;
-    const data = JSON.parse(saved);
-    if (!data.contacts || data.contacts.length === 0) return false;
-    contacts = data.contacts;
-    currentIdx = Math.min(data.currentIdx || 0, contacts.length - 1);
-    activeFilter = data.activeFilter || 'all';
-    return true;
-  } catch(e) { return false; }
-}
-
-function clearSession() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-}
-
-// ── BOOT ─────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  if (loadSession()) {
-    applyFilter();
-    showScreen('dialerScreen');
-    renderCard();
-    showResumeToast();
-  }
-});
-
-function showResumeToast() {
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
-    background:var(--surface); border:1px solid var(--border);
-    color:var(--text); padding:0.65rem 1.25rem; border-radius:30px;
-    font-size:0.85rem; font-weight:600; z-index:200;
-    box-shadow:0 8px 30px rgba(0,0,0,0.4);
-    display:flex; align-items:center; gap:0.5rem;
-    animation: fadeup 0.3s ease;
-  `;
-  const pend = contacts.filter(c => c.status === 'pending').length;
-  toast.innerHTML = `<span style="color:var(--accent)">↩</span> تم استعادة الجلسة — ${pend} متبقي`;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-  const style = document.createElement('style');
-  style.textContent = `@keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`;
-  document.head.appendChild(style);
-}
-
-// ── FILE UPLOAD ───────────────────────────────────────────
-const fileInput = document.getElementById('fileInput');
-const dropzone = document.getElementById('dropzone');
-
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-function handleFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      rawData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      if (rawData.length < 2) { alert('الملف فارغ أو لا يحتوي على بيانات!'); return; }
-      columns = rawData[0].map((c, i) => ({ label: c || `عمود ${i+1}`, idx: i }));
-      populateSelects();
-      document.getElementById('colSetup').style.display = 'block';
-      document.getElementById('startBtn').disabled = false;
-      dropzone.querySelector('p').innerHTML = `<strong style="color:var(--green)">✓ ${file.name}</strong>`;
-    } catch(err) { alert('خطأ في قراءة الملف. تأكد أنه Excel أو CSV.'); }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function populateSelects() {
-  const selects = ['nameCol','phoneCol','extraCol'];
-  selects.forEach(id => {
-    const sel = document.getElementById(id);
-    const keep = id === 'nameCol' || id === 'extraCol' ? sel.children[0].outerHTML : '';
-    sel.innerHTML = keep;
-    columns.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.idx; opt.textContent = c.label;
-      sel.appendChild(opt);
-    });
-  });
-  const guess = columns.findIndex(c => /phone|tel|mob|رقم|تليفون|موبايل|هاتف/i.test(c.label));
-  if (guess >= 0) document.getElementById('phoneCol').value = guess;
-  const nameGuess = columns.findIndex(c => /name|اسم/i.test(c.label));
-  if (nameGuess >= 0) document.getElementById('nameCol').value = nameGuess;
-}
-
-function startDialer() {
-  const phoneColIdx = parseInt(document.getElementById('phoneCol').value);
-  const nameColIdx = document.getElementById('nameCol').value;
-  const extraColIdx = document.getElementById('extraCol').value;
-  const startRow = parseInt(document.getElementById('startRow').value) - 1;
-
-  contacts = [];
-  for (let i = startRow; i < rawData.length; i++) {
-    const row = rawData[i];
-    const phone = String(row[phoneColIdx] || '').trim();
-    if (!phone) continue;
-    contacts.push({
-      phone,
-      name: nameColIdx !== '' ? String(row[parseInt(nameColIdx)] || '').trim() : '',
-      extra: extraColIdx !== '' ? String(row[parseInt(extraColIdx)] || '').trim() : '',
-      status: 'pending',
-      note: '',
-      rowIdx: i
-    });
-  }
-  if (contacts.length === 0) { alert('لم يتم العثور على أرقام في العمود المحدد!'); return; }
-  currentIdx = 0;
-  activeFilter = 'all';
-  applyFilter();
-  persist();
-  showScreen('dialerScreen');
-  renderCard();
-}
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function applyFilter() {
-  if (activeFilter === 'all') {
-    filteredIndices = contacts.map((_, i) => i);
-  } else {
-    filteredIndices = contacts.map((_, i) => i).filter(i => contacts[i].status === activeFilter);
-  }
-}
-
-function renderCard() {
-  if (contacts.length === 0) return;
-  const c = contacts[currentIdx];
-  document.getElementById('contactIndex').textContent = `#${currentIdx + 1} من ${contacts.length}`;
-  document.getElementById('contactName').textContent = c.name || 'بدون اسم';
-  document.getElementById('contactPhone').textContent = c.phone;
-  document.getElementById('contactExtra').textContent = c.extra;
-  document.getElementById('contactExtra').style.display = c.extra ? 'block' : 'none';
-  document.getElementById('callBtn').href = `tel:${c.phone}`;
-  document.getElementById('noteField').value = c.note || '';
-  const initials = c.name ? c.name.trim().split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '؟';
-  document.getElementById('contactAvatar').textContent = initials;
-  updateStatusUI(c.status);
-  updateProgress();
-  document.getElementById('prevBtn').disabled = currentIdx === 0;
-  document.getElementById('nextBtn').textContent = currentIdx >= contacts.length - 1 ? 'إنهاء ✓' : 'التالي →';
-}
-
-function updateStatusUI(status) {
-  const tags = { called: 'NI', noanswer: 'NA', callback: 'Closed', busy: 'Busy', pending: 'معلق' };
-  const tag = document.getElementById('statusTag');
-  tag.textContent = tags[status];
-  tag.className = 'status-tag ' + status;
-  ['btnCalled','btnNo','btnCB','btnBusy'].forEach(id => {
-    document.getElementById(id).className = 'status-btn';
-  });
-  if (status === 'called') document.getElementById('btnCalled').classList.add('sel-called');
-  if (status === 'noanswer') document.getElementById('btnNo').classList.add('sel-noanswer');
-  if (status === 'callback') document.getElementById('btnCB').classList.add('sel-callback');
-  if (status === 'busy') document.getElementById('btnBusy').classList.add('sel-busy');
-}
-
-function setStatus(s) {
-  contacts[currentIdx].status = contacts[currentIdx].status === s ? 'pending' : s;
-  updateStatusUI(contacts[currentIdx].status);
-  updateProgress();
-  persist();
-}
-
-function saveNote() {
-  contacts[currentIdx].note = document.getElementById('noteField').value;
-  persist();
-}
-
-function navigate(dir) {
-  saveNote();
-  const newIdx = currentIdx + dir;
-  if (newIdx < 0) return;
-  if (newIdx >= contacts.length) {
-    const pending = contacts.filter(c => c.status === 'pending').length;
-    if (pending > 0) {
-      if (!confirm(`لا يزال هناك ${pending} معلق. هل تريد الإنهاء؟`)) return;
-    }
-    showDone(); return;
-  }
-  currentIdx = newIdx;
-  persist();
-  renderCard();
-}
-
-function updateProgress() {
-  const total = contacts.length;
-  const called = contacts.filter(c => c.status === 'called').length;
-  const no = contacts.filter(c => c.status === 'noanswer').length;
-  const cb = contacts.filter(c => c.status === 'callback').length;
-  const pend = contacts.filter(c => c.status === 'pending').length;
-  const busy = contacts.filter(c => c.status === 'busy').length;
-  const done = called + no + cb + busy;
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('progText').innerHTML = `<span>${done}</span> / ${total} تم التعامل معهم`;
-  document.getElementById('progPct').textContent = pct + '%';
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('pillCalled').textContent = `NI ${called}`;
-  document.getElementById('pillNo').textContent = `NA ${no}`;
-  document.getElementById('pillCB').textContent = `Closed ${cb}`;
-  document.getElementById('pillBusy').textContent = `Busy ${busy}`;
-  document.getElementById('pillPend').textContent = `⋯ ${pend} معلق`;
-}
-
-// ── LIST ─────────────────────────────────────────────────
-function showList() { renderList(); showScreen('listScreen'); }
-function showDialer() { showScreen('dialerScreen'); renderCard(); }
-
-function renderList() {
-  const q = (document.getElementById('searchInput').value || '').toLowerCase();
-  const container = document.getElementById('listItems');
-  container.innerHTML = '';
-  contacts.forEach((c, i) => {
-    if (q && !c.name.toLowerCase().includes(q) && !c.phone.includes(q)) return;
-    const div = document.createElement('div');
-    div.className = 'list-item';
-    const initials = c.name ? c.name.trim().split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '#';
-    const statusColors = { called: 'var(--green)', noanswer: 'var(--red)', callback: 'var(--blue)', busy: 'var(--orange)', pending: 'var(--text2)' };
-    const statusLabels = { called: 'NI', noanswer: 'NA', callback: '🔒', busy: '📳', pending: '⋯' };
-    div.innerHTML = `
-      <div class="list-item-avatar">${initials}</div>
-      <div class="list-item-info">
-        <div class="list-item-name">${c.name || 'بدون اسم'}</div>
-        <div class="list-item-phone">${c.phone}</div>
+    <div class="progress-section">
+      <div class="progress-numbers">
+        <span id="progText">0 / 0</span>
+        <span id="progPct">0%</span>
       </div>
-      <div class="list-item-status" style="color:${statusColors[c.status]};font-size:1.2rem">${statusLabels[c.status]}</div>
-    `;
-    div.onclick = () => { currentIdx = i; persist(); showDialer(); };
-    container.appendChild(div);
-  });
-  if (container.children.length === 0) {
-    container.innerHTML = '<div style="text-align:center;color:var(--text2);padding:2rem">لا توجد نتائج</div>';
-  }
-}
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="status-pills">
+        <span class="pill called" id="pillCalled">NI 0</span>
+        <span class="pill noanswer" id="pillNo">NA 0</span>
+        <span class="pill callback" id="pillCB">Closed 0</span>
+        <span class="pill busy" id="pillBusy">Busy 0</span>
+        <span class="pill pending" id="pillPend">⋯ 0 معلق</span>
+      </div>
+    </div>
 
-// ── FILTER ───────────────────────────────────────────────
-function openFilter() { document.getElementById('filterOverlay').classList.add('open'); }
-function closeFilter(e) { if (e.target === document.getElementById('filterOverlay')) document.getElementById('filterOverlay').classList.remove('open'); }
-function setFilter(f) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-option').forEach(el => el.classList.remove('active'));
-  document.getElementById('f-' + f).classList.add('active');
-  applyFilter();
-  document.getElementById('filterToggle').className = 'filter-btn' + (f !== 'all' ? ' active' : '');
-  document.getElementById('filterOverlay').classList.remove('open');
-  if (filteredIndices.length > 0) currentIdx = filteredIndices[0];
-  persist();
-  renderCard();
-}
+    <div class="contact-card" id="contactCard">
+      <div class="contact-number-badge">
+        <span id="contactIndex">#1</span>
+        <span class="status-tag pending" id="statusTag">معلق</span>
+      </div>
+      <div class="card-body">
+        <div class="card-left">
+          <div class="contact-avatar" id="contactAvatar">؟</div>
+          <div class="contact-name" id="contactName">—</div>
+          <div class="contact-phone" id="contactPhone">—</div>
+          <div class="contact-extra" id="contactExtra"></div>
+        </div>
+        <div class="card-right">
+          <a class="call-btn" id="callBtn" href="#">
+            <span class="call-icon">📞</span>
+            <span>اتصل الآن</span>
+          </a>
+          <div class="status-btns">
+            <button class="status-btn" id="btnCalled" onclick="setStatus('called')">
+              <span class="s-icon">🚫</span><span style="font-size:1rem;font-weight:900">NI</span><span
+                style="font-size:0.7rem;opacity:0.8">Not Interested</span>
+            </button>
+            <button class="status-btn" id="btnNo" onclick="setStatus('noanswer')">
+              <span class="s-icon">📵</span><span style="font-size:1rem;font-weight:900">NA</span><span
+                style="font-size:0.7rem;opacity:0.8">No Answer</span>
+            </button>
+            <button class="status-btn" id="btnCB" onclick="setStatus('callback')">
+              <span class="s-icon">🔒</span><span style="font-size:1rem;font-weight:900">Closed</span><span
+                style="font-size:0.7rem;opacity:0.8">مغلق</span>
+            </button>
+            <button class="status-btn" id="btnBusy" onclick="setStatus('busy')">
+              <span class="s-icon">📳</span><span style="font-size:1rem;font-weight:900">Busy</span><span
+                style="font-size:0.7rem;opacity:0.8">مشغول</span>
+            </button>
+          </div>
+          <div class="notes-area">
+            <div class="notes-label">ملاحظات</div>
+            <textarea id="noteField" placeholder="أضف ملاحظة..." onchange="saveNote()"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
 
-// ── DONE ─────────────────────────────────────────────────
-function showDone() {
-  const called = contacts.filter(c => c.status === 'called').length;
-  const no = contacts.filter(c => c.status === 'noanswer').length;
-  const cb = contacts.filter(c => c.status === 'callback').length;
-  const busy = contacts.filter(c => c.status === 'busy').length;
-  document.getElementById('doneCalledN').textContent = called;
-  document.getElementById('doneNoN').textContent = no;
-  document.getElementById('doneCBN').textContent = cb;
-  document.getElementById('doneBusyN').textContent = busy;
-  showScreen('doneScreen');
-}
+    <div class="nav-btns">
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">← السابق</button>
+      <button class="nav-btn next" id="nextBtn" onclick="navigate(1)">التالي →</button>
+    </div>
+  </div>
 
-// ── EXPORT ───────────────────────────────────────────────
-function exportResults() {
-  const statusLabels = { called: 'NI - Not Interested', noanswer: 'NA - No Answer', callback: 'Closed', busy: 'Busy - مشغول', pending: 'معلق' };
-  const rows = [['الاسم', 'التليفون', 'معلومة إضافية', 'الحالة', 'ملاحظات']];
-  contacts.forEach(c => {
-    rows.push([c.name, c.phone, c.extra, statusLabels[c.status], c.note]);
-  });
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'نتائج الاتصالات');
-  XLSX.writeFile(wb, `نتائج_الاتصالات_${new Date().toLocaleDateString('ar')}.xlsx`);
-}
+  <!-- LIST SCREEN -->
+  <div id="listScreen" class="screen">
+    <div class="list-header">
+      <button class="back-btn" onclick="showDialer()">←</button>
+      <span style="font-weight:700">قائمة الاتصالات</span>
+      <button class="export-btn" style="width:auto;padding:0.35rem 0.85rem;font-size:0.85rem;border-radius:20px"
+        onclick="exportResults()">تصدير</button>
+    </div>
+    <div class="list-search">
+      <input type="text" placeholder="بحث..." id="searchInput" oninput="renderList()">
+    </div>
+    <div class="list-items" id="listItems"></div>
+  </div>
 
-// ── RESTART ──────────────────────────────────────────────
-function restartApp() {
-  if (!confirm('هتتمسح كل البيانات. متأكد؟')) return;
-  clearSession();
-  contacts = []; currentIdx = 0; rawData = []; activeFilter = 'all';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('colSetup').style.display = 'none';
-  document.getElementById('startBtn').disabled = true;
-  dropzone.querySelector('p').innerHTML = '<strong>اختر ملف Excel</strong>';
-  showScreen('uploadScreen');
-}
-</script>
+  <!-- DONE SCREEN -->
+  <div id="doneScreen" class="screen">
+    <div class="inner">
+      <div class="done-ring">🎉</div>
+      <div>
+        <div class="upload-title">انتهت الجلسة!</div>
+        <div class="upload-sub" style="margin-top:0.5rem">أتممت كل الاتصالات</div>
+      </div>
+      <div class="done-stats">
+        <div class="done-stat">
+          <div class="done-stat-num" style="color:var(--green)" id="doneCalledN">0</div>
+          <div class="done-stat-label">NI</div>
+        </div>
+        <div class="done-stat">
+          <div class="done-stat-num" style="color:var(--red)" id="doneNoN">0</div>
+          <div class="done-stat-label">NA</div>
+        </div>
+        <div class="done-stat">
+          <div class="done-stat-num" style="color:var(--blue)" id="doneCBN">0</div>
+          <div class="done-stat-label">Closed</div>
+        </div>
+        <div class="done-stat">
+          <div class="done-stat-num" style="color:var(--orange)" id="doneBusyN">0</div>
+          <div class="done-stat-label">Busy</div>
+        </div>
+      </div>
+      <button class="export-btn" onclick="exportResults()">📥 تصدير النتائج Excel</button>
+      <button class="btn-secondary" onclick="restartApp()">بدء جلسة جديدة</button>
+    </div>
+  </div>
+
+  <!-- FILTER OVERLAY -->
+  <div class="filter-overlay" id="filterOverlay" onclick="closeFilter(event)">
+    <div class="filter-sheet">
+      <h3>عرض جهات الاتصال</h3>
+      <div class="filter-option active" id="f-all" onclick="setFilter('all')">🔵 الكل</div>
+      <div class="filter-option" id="f-pending" onclick="setFilter('pending')">⋯ معلق</div>
+      <div class="filter-option" id="f-called" onclick="setFilter('called')">🚫 NI — Not Interested</div>
+      <div class="filter-option" id="f-noanswer" onclick="setFilter('noanswer')">📵 NA — No Answer</div>
+      <div class="filter-option" id="f-callback" onclick="setFilter('callback')">🔒 Closed — مغلق</div>
+      <div class="filter-option" id="f-busy" onclick="setFilter('busy')">📳 Busy — مشغول</div>
+    </div>
+  </div>
+
+  <script src="script/main.js"></script>
 </body>
+
 </html>
