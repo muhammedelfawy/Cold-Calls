@@ -545,9 +545,13 @@
 
     /* Status Buttons */
     .status-btns {
-      display: grid;
+      /* display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: clamp(0.4rem, 1.5vw, 0.75rem); */
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: clamp(0.4rem, 1.5vw, 0.75rem);
+
     }
 
     .status-btn {
