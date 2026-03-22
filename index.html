@@ -1463,6 +1463,12 @@
     // CORE
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
     function applyFilter() { filteredIndices = activeFilter === 'all' ? contacts.map((_, i) => i) : contacts.map((_, i) => i).filter(i => contacts[i].status === activeFilter); }
+    function formatPhone(p) {
+      const n = String(p).trim();
+      if (n.startsWith('2')) return n.slice(1);
+      if (n.startsWith('1')) return '0' + n;
+      return n;
+    }
 
     function renderCard() {
       if (!contacts.length) return;
@@ -1472,7 +1478,8 @@
       document.getElementById('contactPhone').textContent = c.phone;
       const extraEl = document.getElementById('contactExtra');
       extraEl.textContent = c.extra || ''; extraEl.style.display = c.extra ? 'block' : 'none';
-      document.getElementById('callBtn').href = `tel:${c.phone}`;
+      // document.getElementById('callBtn').href = `tel:${c.phone}`;
+      document.getElementById('callBtn').href = `tel:${formatPhone(c.phone)}`;
       document.getElementById('noteField').value = c.note || '';
       document.getElementById('contactAvatar').textContent = c.name ? c.name.trim().split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : '؟';
       updateStatusUI(c.status); updateProgress();
